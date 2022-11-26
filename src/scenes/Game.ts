@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-
+import Player from "../objects/Player";
+import Obstacle from "../objects/Obstacle";
 export default class Demo extends Phaser.Scene {
   constructor() {
     super("GameScene");
@@ -8,21 +9,7 @@ export default class Demo extends Phaser.Scene {
   preload() {}
 
   create() {
-    // In Phaser objects are position at their center-points (0,0 is at center of object)
-    const player = this.add.rectangle(
-      25,
-      this.renderer.height - 50 / 2,
-      50,
-      50,
-      0xff0000
-    );
-
-    const obstacle = this.add.rectangle(
-      400,
-      this.renderer.height - 100 / 2,
-      200,
-      100,
-      0x00ff00
-    );
+    const player = new Player(this);
+    const obstacle = new Obstacle(this);
   }
 }
