@@ -3,12 +3,9 @@ import Player from "../objects/Player";
 import Obstacle from "../objects/Obstacle";
 
 export default class Demo extends Phaser.Scene {
-  sceneGlobals: {
-    currentObstacle: Obstacle | undefined;
-    currentPlayer: Player | undefined;
-  } = {
-    currentObstacle: undefined,
-    currentPlayer: undefined,
+  sceneObjects!: {
+    currentObstacle: Obstacle;
+    currentPlayer: Player;
   };
 
   constructor() {
@@ -23,23 +20,25 @@ export default class Demo extends Phaser.Scene {
     this.physics.add.existing(player.sprite);
     this.physics.add.existing(obstacle.sprite);
     obstacle.sprite.body.velocity.x = -100;
-    this.sceneGlobals.currentObstacle = obstacle;
-    this.sceneGlobals.currentPlayer = player;
+
+    this.sceneObjects = {
+      currentObstacle: obstacle,
+      currentPlayer: player,
+    };
   }
 
   update() {
     let massObjects = [
-      this.sceneGlobals.currentObstacle,
-      this.sceneGlobals.currentPlayer,
+      this.sceneObjects.currentObstacle,
+      this.sceneObjects.currentPlayer,
     ];
 
-    massObjects.forEach((obj) => {
-      if (obj === undefined) {
-        return;
-      }
+    // TODO: Add collision detection via this example: https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_breakout_game_Phaser/Collision_detection#brickball_collision_detection
 
+    massObjects.forEach((obj) => {
       let obstacleBody = obj.sprite.body;
 
+      // Prevent objects from falling out of
       if (obstacleBody.position.y >= this.renderer.height - obj.height) {
         obstacleBody.position.y = this.renderer.height - obj.height;
       }
