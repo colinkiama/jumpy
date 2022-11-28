@@ -22,7 +22,7 @@ export default class Player {
     this.width = PLAYER_WIDTH;
     this.height = PLAYER_HEIGHT;
     this.scene = scene;
-    this.offsetX = this.width / 2;
+    this.offsetX = this.width / 2 + 50;
     this.offsetY = this.scene.renderer.height - this.height / 2;
     this.sprite = this.scene.add.rectangle(
       this.offsetX,
