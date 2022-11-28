@@ -4,10 +4,9 @@ import Obstacle from "../objects/Obstacle";
 
 export default class Demo extends Phaser.Scene {
   private hasObstacleCollidedWithPlayer: boolean = false;
-  private sceneObjects!: {
-    currentObstacle: Obstacle;
-    currentPlayer: Player;
-  };
+  private keySpace!: Phaser.Input.Keyboard.Key;
+  private player!: Player;
+  private obstacle!: Obstacle;
 
   constructor() {
     super("GameScene");
@@ -16,38 +15,38 @@ export default class Demo extends Phaser.Scene {
   preload() {}
 
   create() {
-    const player = new Player(this);
-    const obstacle = new Obstacle(this);
-    this.physics.add.existing(player.sprite);
-    this.physics.add.existing(obstacle.sprite);
-    obstacle.sprite.body.velocity.x = -100;
+    this.player = new Player(this);
+    this.obstacle = new Obstacle(this);
+    this.physics.add.existing(this.player.sprite);
+    this.physics.add.existing(this.obstacle.sprite);
+    this.obstacle.sprite.body.velocity.x = -400;
 
-    this.sceneObjects = {
-      currentObstacle: obstacle,
-      currentPlayer: player,
-    };
+    this.keySpace = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
   }
 
   update() {
-    let massObjects = [
-      this.sceneObjects.currentObstacle,
-      this.sceneObjects.currentPlayer,
-    ];
+    let massObjects = [this.obstacle, this.player];
 
     massObjects.forEach((obj) => {
-      let obstacleBody = obj.sprite.body;
+      let objectBody = obj.sprite.body;
 
       // Prevent objects from falling out of
-      if (obstacleBody.position.y >= this.renderer.height - obj.height) {
-        obstacleBody.position.y = this.renderer.height - obj.height;
+      if (objectBody.position.y > this.renderer.height - obj.height) {
+        objectBody.position.y = this.renderer.height - obj.height;
       }
     });
 
     this.physics.collide(
-      this.sceneObjects.currentObstacle.sprite,
-      this.sceneObjects.currentPlayer.sprite,
+      this.obstacle.sprite,
+      this.player.sprite,
       this.playerHitObstacle
     );
+
+    if (this.keySpace.isDown && this.player.isGrounded) {
+      this.player.jump();
+    }
   }
 
   playerHitObstacle(

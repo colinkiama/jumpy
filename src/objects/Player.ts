@@ -12,6 +12,12 @@ export default class Player {
   scene: Phaser.Scene;
   sprite: Phaser.GameObjects.Rectangle;
 
+  public get isGrounded() {
+    return (
+      this.sprite.body.position.y == this.scene.renderer.height - this.height
+    );
+  }
+
   constructor(scene: Phaser.Scene) {
     this.width = PLAYER_WIDTH;
     this.height = PLAYER_HEIGHT;
@@ -25,5 +31,9 @@ export default class Player {
       this.height,
       PLAYER_COLOR
     );
+  }
+
+  jump() {
+    this.sprite.body.velocity.y = -1000;
   }
 }
