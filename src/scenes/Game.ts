@@ -9,6 +9,7 @@ export default class Demo extends Phaser.Scene {
   private player!: Player;
   private obstacle!: Obstacle;
   private checkpointLine!: Phaser.GameObjects.Line;
+  private hasObstacleOverlappedCheckpoint: boolean = false;
 
   constructor() {
     super("GameScene");
@@ -56,7 +57,10 @@ export default class Demo extends Phaser.Scene {
     checkpointLine: Phaser.Types.Physics.Arcade.GameObjectWithBody,
     sprite: Phaser.Types.Physics.Arcade.GameObjectWithBody
   ) {
-    this.increaseScore();
+    if (!this.hasObstacleOverlappedCheckpoint) {
+      this.hasObstacleOverlappedCheckpoint = true;
+      this.increaseScore();
+    }
   }
 
   update() {
