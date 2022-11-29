@@ -4,12 +4,12 @@ import Obstacle from "../objects/Obstacle";
 
 export default class Demo extends Phaser.Scene {
   private hasObstacleCollidedWithPlayer: boolean = false;
-  private score: number = 0;
   private keySpace!: Phaser.Input.Keyboard.Key;
   private player!: Player;
   private obstacle!: Obstacle;
   private checkpointLine!: Phaser.GameObjects.Line;
   private hasObstacleOverlappedCheckpoint: boolean = false;
+  private scoreText!: Phaser.GameObjects.Text;
 
   constructor() {
     super("GameScene");
@@ -18,6 +18,7 @@ export default class Demo extends Phaser.Scene {
   preload() {}
 
   create() {
+    this.data.set("score", 0);
     this.player = new Player(this);
     this.obstacle = new Obstacle(this);
     this.physics.add.existing(this.player.sprite);
@@ -32,7 +33,6 @@ export default class Demo extends Phaser.Scene {
     let checkpointX =
       this.player.width - thresholdDistance - this.obstacle.width;
 
-    // let checkpointX = 400;
     this.checkpointLine = this.add.line(
       checkpointX,
       this.renderer.height / 2,
@@ -51,7 +51,19 @@ export default class Demo extends Phaser.Scene {
       this.obstacleReachedCheckpoint.bind(this)
     );
 
-    console.log("Starting score:", this.score);
+    this.scoreText = this.add.text(100, 100, "", {
+      font: "64px Courier",
+      color: "#00ff00",
+    });
+
+    this.scoreText.setText(["Score: " + this.data.get("score")]);
+
+    this.data.events.on(
+      "changedata-score",
+      (currentScene: Phaser.Scene, nextValue: number) => {
+        this.scoreText.setText(["Score: " + this.data.get("score")]);
+      }
+    );
   }
   obstacleReachedCheckpoint(
     checkpointLine: Phaser.Types.Physics.Arcade.GameObjectWithBody,
@@ -69,7 +81,7 @@ export default class Demo extends Phaser.Scene {
     massObjects.forEach((obj) => {
       let objectBody = obj.sprite.body;
 
-      // Prevent objects from falling out of
+      // Prevent objects from falling thought bottom edge of screen
       if (objectBody.position.y > this.renderer.height - obj.height) {
         objectBody.position.y = this.renderer.height - obj.height;
       }
@@ -109,11 +121,11 @@ export default class Demo extends Phaser.Scene {
   }
 
   increaseScore() {
-    this.setScore(this.score + 1);
+    let currentScore = this.data.get("score") as number;
+    this.setScore(currentScore + 1);
   }
 
-  setScore(num: number) {
-    this.score = num;
-    console.log("New Score:", this.score);
+  setScore(nextScore: number) {
+    this.data.set("score", nextScore);
   }
 }
