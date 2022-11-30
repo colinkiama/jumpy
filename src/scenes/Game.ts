@@ -31,7 +31,7 @@ export default class Demo extends Phaser.Scene {
 
     let thresholdDistance = 10;
     let checkpointX =
-      this.player.width - thresholdDistance - this.obstacle.width;
+      this.player.sprite.width - thresholdDistance - this.obstacle.sprite.width;
 
     this.checkpointLine = this.add.line(
       checkpointX,
@@ -82,8 +82,8 @@ export default class Demo extends Phaser.Scene {
       let objectBody = obj.sprite.body;
 
       // Prevent objects from falling thought bottom edge of screen
-      if (objectBody.position.y > this.renderer.height - obj.height) {
-        objectBody.position.y = this.renderer.height - obj.height;
+      if (objectBody.position.y > this.renderer.height - obj.sprite.height) {
+        objectBody.position.y = this.renderer.height - obj.sprite.height;
       }
     });
 
