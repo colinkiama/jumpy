@@ -34,7 +34,7 @@ export default class Obstacle {
 
   completed: boolean;
 
-  sprite: Phaser.GameObjects.Rectangle;
+  sprite: Phaser.GameObjects.Rectangle & Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody;
 
   constructor(type: ObstacleVariation, scene: Phaser.Scene) {
     this._obstacleVariation = type;
@@ -53,7 +53,8 @@ export default class Obstacle {
           startingOffsetY,
           this._obstacleVariation.width,
           this._obstacleVariation.height,
-          this._obstacleVariation.color
+          this._obstacleVariation.color,
+          0.5
         );
 
         break;

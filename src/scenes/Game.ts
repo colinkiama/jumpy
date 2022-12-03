@@ -77,8 +77,6 @@ export default class Demo extends Phaser.Scene {
   }
 
   update() {
-    this.applySolidGround();
-
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       this.handleObstacleMoveToOffScreen(this.obstacles[i]);
 
@@ -168,6 +166,7 @@ export default class Demo extends Phaser.Scene {
 
   setupObstacleCollisions(obstacle: Obstacle) {
     this.physics.add.existing(obstacle.sprite);
+    obstacle.sprite.body.immovable = true;
     obstacle.sprite.body.velocity.x = -400;
 
     this.physics.add.collider(
@@ -192,26 +191,9 @@ export default class Demo extends Phaser.Scene {
   setupPlayer() {
     let createdPlayer = new Player(this);
     this.physics.add.existing(createdPlayer.sprite);
+    createdPlayer.sprite.body.collideWorldBounds = true;
+    createdPlayer.sprite.body.gravity.y = 2525;
 
     return createdPlayer;
-  }
-
-  applySolidGround() {
-    let massObjects = [...this.obstacles, this.player];
-    massObjects.forEach((obj) => {
-      let objectBody = obj.sprite.body;
-      // Prevent objects from falling thought bottom edge of screen
-      if (objectBody.position.y > this.renderer.height - obj.sprite.height) {
-        objectBody.position.y = this.renderer.height - obj.sprite.height;
-      }
-    });
-
-    if (
-      this.checkpointLine.body.position.y >
-      this.renderer.height - this.checkpointLine.height
-    ) {
-      this.checkpointLine.body.position.y =
-        this.renderer.height - this.checkpointLine.height;
-    }
   }
 }
