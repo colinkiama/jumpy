@@ -817,6 +817,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jumpy@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "jumpy@workspace:."
+  dependencies:
+    "@rollup/plugin-alias": ^3.1.9
+    "@rollup/plugin-commonjs": ^22.0.0
+    "@rollup/plugin-replace": ^4.0.0
+    "@types/node": ^17.0.31
+    phaser: ^3.55.2
+    typescript: ^4.6.4
+    vite: ^2.9.13
+  languageName: unknown
+  linkType: soft
+
 "lru-cache@npm:^6.0.0":
   version: 6.0.0
   resolution: "lru-cache@npm:6.0.0"
@@ -1077,20 +1091,6 @@ __metadata:
   checksum: 5dedb71e78fc008fcba797defc0b4e1cf06c1f18e0a631e03ba5bb505136f587ff017afc14f9a3d481cbe77aeedff7dc0c1d2ce4d820c1ebf3c4281ca49423a1
   languageName: node
   linkType: hard
-
-"phaser3-rollup-typescript@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "phaser3-rollup-typescript@workspace:."
-  dependencies:
-    "@rollup/plugin-alias": ^3.1.9
-    "@rollup/plugin-commonjs": ^22.0.0
-    "@rollup/plugin-replace": ^4.0.0
-    "@types/node": ^17.0.31
-    phaser: ^3.55.2
-    typescript: ^4.6.4
-    vite: ^2.9.13
-  languageName: unknown
-  linkType: soft
 
 "phaser@npm:^3.55.2":
   version: 3.55.2

@@ -167,8 +167,8 @@ export default class Demo extends Phaser.Scene {
   }
 
   setupObstacleCollisions(obstacle: Obstacle) {
-    obstacle.sprite.body.velocity.x = -400;
     this.physics.add.existing(obstacle.sprite);
+    obstacle.sprite.body.velocity.x = -400;
 
     this.physics.add.collider(
       obstacle.sprite,
