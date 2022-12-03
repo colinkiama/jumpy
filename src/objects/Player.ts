@@ -7,8 +7,6 @@ const PLAYER_COLOR = 0x00ff00;
 export default class Player {
   private _width: number;
   private _height: number;
-  private _offsetX: number;
-  private _offsetY: number;
   private _scene: Phaser.Scene;
   sprite: Phaser.GameObjects.Rectangle;
 
@@ -22,11 +20,11 @@ export default class Player {
     this._width = PLAYER_WIDTH;
     this._height = PLAYER_HEIGHT;
     this._scene = scene;
-    this._offsetX = this._width / 2 + 50;
-    this._offsetY = this._scene.renderer.height - this._height / 2;
+    let startingOffsetX = this._width / 2 + 50;
+    let startingOffsetY = this._scene.renderer.height - this._height / 2;
     this.sprite = this._scene.add.rectangle(
-      this._offsetX,
-      this._offsetY,
+      startingOffsetX,
+      startingOffsetY,
       this._width,
       this._height,
       PLAYER_COLOR

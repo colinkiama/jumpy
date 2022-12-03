@@ -30,24 +30,37 @@ export class ObstacleVariation {
 }
 export default class Obstacle {
   private _obstacleVariation: ObstacleVariation;
-  private _offsetX: number;
-  private _offsetY: number;
   private _scene: Phaser.Scene;
+
+  completed: boolean;
+
   sprite: Phaser.GameObjects.Rectangle;
 
   constructor(type: ObstacleVariation, scene: Phaser.Scene) {
     this._obstacleVariation = type;
     this._scene = scene;
-    this._offsetX =
+    this.completed = false;
+
+    let startingOffsetX =
       this._scene.renderer.width + this._obstacleVariation.width * 2;
-    this._offsetY =
+    let startingOffsetY =
       this._scene.renderer.height - this._obstacleVariation.height / 2;
-    this.sprite = this._scene.add.rectangle(
-      this._offsetX,
-      this._offsetY,
-      this._obstacleVariation.width,
-      this._obstacleVariation.height,
-      this._obstacleVariation.color
-    );
+
+    switch (this._obstacleVariation.type) {
+      case ObstacleType.BLOCK:
+        this.sprite = this._scene.add.rectangle(
+          startingOffsetX,
+          startingOffsetY,
+          this._obstacleVariation.width,
+          this._obstacleVariation.height,
+          this._obstacleVariation.color
+        );
+
+        break;
+    }
+  }
+
+  complete() {
+    this.completed = true;
   }
 }

@@ -48,6 +48,8 @@ export default class Demo extends Phaser.Scene {
 
   setupCheckpointLine() {
     const thresholdDistance = 10;
+
+    // let checkpointX = 100;
     let checkpointX =
       this.player.sprite.width - thresholdDistance - BLOCK_OBSTACLE_WIDTH;
 
@@ -68,27 +70,17 @@ export default class Demo extends Phaser.Scene {
 
   obstacleReachedCheckpoint(
     checkpointLine: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-    sprite: Phaser.Types.Physics.Arcade.GameObjectWithBody
+    obstacle: Obstacle
   ) {
     this.increaseScore();
+    obstacle.complete();
   }
 
   update() {
-    let massObjects = [...this.obstacles, this.player];
-    massObjects.forEach((obj) => {
-      let objectBody = obj.sprite.body;
-      // Prevent objects from falling thought bottom edge of screen
-      if (objectBody.position.y > this.renderer.height - obj.sprite.height) {
-        objectBody.position.y = this.renderer.height - obj.sprite.height;
-      }
-    });
+    this.applySolidGround();
 
-    if (
-      this.checkpointLine.body.position.y >
-      this.renderer.height - this.checkpointLine.height
-    ) {
-      this.checkpointLine.body.position.y =
-        this.renderer.height - this.checkpointLine.height;
+    for (let i = this.obstacles.length - 1; i >= 0; i--) {
+      this.handleObstacleMoveToOffScreen(this.obstacles[i]);
     }
 
     if (this.keySpace.isDown && this.player.isGrounded) {
@@ -134,6 +126,25 @@ export default class Demo extends Phaser.Scene {
     this.obstacles.push(createdObstacle);
   }
 
+  handleObstacleMoveToOffScreen(obstacle: Obstacle) {
+    if (obstacle.sprite.body.position.x >= -obstacle.sprite.width) {
+      return;
+    }
+
+    let deletedObstacles = this.obstacles.splice(
+      this.obstacles.indexOf(obstacle),
+      1
+    );
+
+    if (deletedObstacles.length < 1) {
+      return;
+    }
+
+    deletedObstacles[0].sprite.destroy();
+    console.log("Obstacle destroyed forever:", deletedObstacles[0]);
+    this.addBlockObstacle();
+  }
+
   setupObstacleCollisions(obstacle: Obstacle) {
     this.physics.add.existing(obstacle.sprite);
     obstacle.sprite.body.velocity.x = -400;
@@ -145,11 +156,15 @@ export default class Demo extends Phaser.Scene {
         this.playerHitObstacle(obstacleSprite, playerSprite)
     );
 
-    this.physics.add.collider(
+    this.physics.add.overlap(
       this.checkpointLine,
       obstacle.sprite,
-      (checkpointLine, obstacle) =>
-        this.obstacleReachedCheckpoint(checkpointLine, obstacle)
+      (checkpointLine, _) => {
+        this.obstacleReachedCheckpoint(checkpointLine, obstacle);
+      },
+      (_, __) => {
+        return !obstacle.completed;
+      }
     );
   }
 
@@ -158,5 +173,24 @@ export default class Demo extends Phaser.Scene {
     this.physics.add.existing(createdPlayer.sprite);
 
     return createdPlayer;
+  }
+
+  applySolidGround() {
+    let massObjects = [...this.obstacles, this.player];
+    massObjects.forEach((obj) => {
+      let objectBody = obj.sprite.body;
+      // Prevent objects from falling thought bottom edge of screen
+      if (objectBody.position.y > this.renderer.height - obj.sprite.height) {
+        objectBody.position.y = this.renderer.height - obj.sprite.height;
+      }
+    });
+
+    if (
+      this.checkpointLine.body.position.y >
+      this.renderer.height - this.checkpointLine.height
+    ) {
+      this.checkpointLine.body.position.y =
+        this.renderer.height - this.checkpointLine.height;
+    }
   }
 }
