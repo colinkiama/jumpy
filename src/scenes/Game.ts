@@ -13,7 +13,6 @@ export default class Demo extends Phaser.Scene {
   private keySpace!: Phaser.Input.Keyboard.Key;
   private player!: Player;
   private obstacles: Obstacle[] = [];
-  // private obstacle!: Obstacle;
   private checkpointLine!: Phaser.GameObjects.Line;
   private hasObstacleOverlappedCheckpoint: boolean = false;
   private scoreText!: Phaser.GameObjects.Text;
