@@ -1,29 +1,53 @@
 import Phaser from "phaser";
 
-const OBSTACLE_WIDTH = 100;
-const OBSTACLE_HEIGHT = 80;
-const OBSTACLE_COLOR = 0xff0000;
+export const BLOCK_OBSTACLE_WIDTH = 100;
+export const BLOCK_OBSTACLE_HEIGHT = 80;
+export const BLOCK_OBSTACLE_COLOR = 0xff0000;
 
+export enum ObstacleType {
+  BLOCK,
+}
+
+export type ObstacleVariationProps = {
+  type: ObstacleType;
+  width: number;
+  height: number;
+  color: number;
+};
+
+export class ObstacleVariation {
+  width: number;
+  height: number;
+  type: ObstacleType;
+  color: number;
+
+  constructor(props: ObstacleVariationProps) {
+    this.width = props.width;
+    this.height = props.height;
+    this.type = props.type;
+    this.color = props.color;
+  }
+}
 export default class Obstacle {
-  private _width: number;
-  private _height: number;
+  private _obstacleVariation: ObstacleVariation;
   private _offsetX: number;
   private _offsetY: number;
   private _scene: Phaser.Scene;
   sprite: Phaser.GameObjects.Rectangle;
 
-  constructor(scene: Phaser.Scene) {
-    this._width = OBSTACLE_WIDTH;
-    this._height = OBSTACLE_HEIGHT;
+  constructor(type: ObstacleVariation, scene: Phaser.Scene) {
+    this._obstacleVariation = type;
     this._scene = scene;
-    this._offsetX = this._scene.renderer.width + this._width * 2;
-    this._offsetY = this._scene.renderer.height - this._height / 2;
+    this._offsetX =
+      this._scene.renderer.width + this._obstacleVariation.width * 2;
+    this._offsetY =
+      this._scene.renderer.height - this._obstacleVariation.height / 2;
     this.sprite = this._scene.add.rectangle(
       this._offsetX,
       this._offsetY,
-      this._width,
-      this._height,
-      OBSTACLE_COLOR
+      this._obstacleVariation.width,
+      this._obstacleVariation.height,
+      this._obstacleVariation.color
     );
   }
 }

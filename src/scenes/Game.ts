@@ -1,6 +1,12 @@
 import Phaser, { Tilemaps } from "phaser";
 import Player from "../objects/Player";
-import Obstacle from "../objects/Obstacle";
+import Obstacle, {
+  BLOCK_OBSTACLE_COLOR,
+  BLOCK_OBSTACLE_HEIGHT,
+  BLOCK_OBSTACLE_WIDTH,
+  ObstacleType,
+} from "../objects/Obstacle";
+import ObstacleFactory from "../objects/ObstacleFactory";
 
 export default class Demo extends Phaser.Scene {
   private hasObstacleCollidedWithPlayer: boolean = false;
@@ -20,7 +26,16 @@ export default class Demo extends Phaser.Scene {
   create() {
     this.data.set("score", 0);
     this.player = new Player(this);
-    this.obstacle = new Obstacle(this);
+    this.obstacle = new Obstacle(
+      ObstacleFactory.getObstacleVariation({
+        type: ObstacleType.BLOCK,
+        width: BLOCK_OBSTACLE_WIDTH,
+        height: BLOCK_OBSTACLE_HEIGHT,
+        color: BLOCK_OBSTACLE_COLOR,
+      }),
+      this
+    );
+
     this.physics.add.existing(this.player.sprite);
     this.physics.add.existing(this.obstacle.sprite);
     this.obstacle.sprite.body.velocity.x = -400;
