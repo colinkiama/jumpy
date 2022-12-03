@@ -81,6 +81,27 @@ export default class Demo extends Phaser.Scene {
 
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       this.handleObstacleMoveToOffScreen(this.obstacles[i]);
+
+      if (
+        this.obstacles[i].sprite.x > 200 ||
+        this.hasObstacleCollidedWithPlayer
+      ) {
+        continue;
+      }
+
+      console.log(
+        "Player:",
+        this.player.sprite.body.position.x,
+        ",",
+        this.player.sprite.body.position.y
+      );
+
+      console.log(
+        "Obstacle:",
+        this.obstacles[i].sprite.body.position.x,
+        ",",
+        this.obstacles[i].sprite.body.position.y
+      );
     }
 
     if (this.keySpace.isDown && this.player.isGrounded) {
