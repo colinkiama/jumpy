@@ -8,7 +8,7 @@ export default class Player {
   private _width: number;
   private _height: number;
   private _scene: Phaser.Scene;
-  sprite: Phaser.GameObjects.Rectangle;
+  sprite: Phaser.GameObjects.Rectangle & Phaser.Types.Physics.Arcade.GameObjectWithDynamicBody;
 
   public get isGrounded() {
     return (
@@ -27,7 +27,8 @@ export default class Player {
       startingOffsetY,
       this._width,
       this._height,
-      PLAYER_COLOR
+      PLAYER_COLOR,
+      0.5
     );
   }
 
