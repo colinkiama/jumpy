@@ -9,10 +9,10 @@ import Obstacle, {
 import ObstacleFactory from "../objects/ObstacleFactory";
 
 export default class Demo extends Phaser.Scene {
-  private hasObstacleCollidedWithPlayer: boolean = false;
+  private hasObstacleCollidedWithPlayer!: boolean;
   private keySpace!: Phaser.Input.Keyboard.Key;
   private player!: Player;
-  private obstacles: Obstacle[] = [];
+  private obstacles!: Obstacle[];
   private checkpointLine!: Phaser.GameObjects.Line;
   private scoreText!: Phaser.GameObjects.Text;
   private buttonReset!: Phaser.GameObjects.Rectangle;
@@ -25,7 +25,7 @@ export default class Demo extends Phaser.Scene {
   preload() {}
 
   create() {
-    this.data.set("score", 0);
+    this.obstacles = [];
     this.player = this.setupPlayer();
     this.checkpointLine = this.setupCheckpointLine();
     this.addBlockObstacle();
