@@ -9,12 +9,14 @@ import Obstacle, {
 import ObstacleFactory from "../objects/ObstacleFactory";
 
 export default class Demo extends Phaser.Scene {
-  private hasObstacleCollidedWithPlayer: boolean = false;
+  private hasObstacleCollidedWithPlayer!: boolean;
   private keySpace!: Phaser.Input.Keyboard.Key;
   private player!: Player;
-  private obstacles: Obstacle[] = [];
+  private obstacles!: Obstacle[];
   private checkpointLine!: Phaser.GameObjects.Line;
   private scoreText!: Phaser.GameObjects.Text;
+  private buttonReset!: Phaser.GameObjects.Rectangle;
+  private gameOverText!: Phaser.GameObjects.Text;
 
   constructor() {
     super("GameScene");
@@ -23,7 +25,7 @@ export default class Demo extends Phaser.Scene {
   preload() {}
 
   create() {
-    this.data.set("score", 0);
+    this.obstacles = [];
     this.player = this.setupPlayer();
     this.checkpointLine = this.setupCheckpointLine();
     this.addBlockObstacle();
@@ -36,14 +38,43 @@ export default class Demo extends Phaser.Scene {
       font: "64px Courier",
       color: "#00ff00",
     });
+    this.scoreText.setDataEnabled();
+    this.scoreText.data.set("score", 0);
 
-    this.scoreText.setText(["Score: " + this.data.get("score")]);
-    this.data.events.on(
+    this.gameOverText = this.add
+      .text(400 - 40, 300 - 10, "GameOver", {
+        color: "#000000",
+      })
+      .setDepth(2);
+
+    this.gameOverText.visible = false;
+    this.buttonReset = this.add
+      .rectangle(400 - 100, 300 - 40, 200, 80, 0xffffff)
+      .setDepth(1)
+      .setOrigin(0, 0);
+
+    this.buttonReset.visible = false;
+    this.buttonReset.setInteractive({ useHandCursor: true });
+    this.buttonReset.on("pointerup", () => this.scene.start("GameScene"));
+
+    this.scoreText.setText(["Score: " + this.scoreText.data.get("score")]);
+    this.scoreText.data.events.on(
       "changedata-score",
-      (currentScene: Phaser.Scene, nextValue: number) => {
-        this.scoreText.setText(["Score: " + this.data.get("score")]);
+      (currentScoreText: Phaser.GameObjects.Text, nextValue: number) => {
+        this.scoreText.setText(["Score: " + nextValue]);
       }
     );
+
+    this.startSpawner();
+  }
+
+  startSpawner() {
+    setTimeout(() => {
+      if (!this.hasObstacleCollidedWithPlayer) {
+        this.addBlockObstacle();
+        this.startSpawner();
+      }
+    }, this.getIntervalBetweenSpawn());
   }
 
   setupCheckpointLine() {
@@ -80,26 +111,14 @@ export default class Demo extends Phaser.Scene {
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       this.handleObstacleMoveToOffScreen(this.obstacles[i]);
 
-      if (
-        this.obstacles[i].sprite.x > 200 ||
-        this.hasObstacleCollidedWithPlayer
-      ) {
-        continue;
+      if (this.obstacles[i]) {
+        if (
+          this.obstacles[i].sprite.x > 200 ||
+          this.hasObstacleCollidedWithPlayer
+        ) {
+          continue;
+        }
       }
-
-      console.log(
-        "Player:",
-        this.player.sprite.body.position.x,
-        ",",
-        this.player.sprite.body.position.y
-      );
-
-      console.log(
-        "Obstacle:",
-        this.obstacles[i].sprite.body.position.x,
-        ",",
-        this.obstacles[i].sprite.body.position.y
-      );
     }
 
     if (this.keySpace.isDown && this.player.isGrounded) {
@@ -107,27 +126,31 @@ export default class Demo extends Phaser.Scene {
     }
   }
 
-  playerHitObstacle(
-    obstacle: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-    player: Phaser.Types.Physics.Arcade.GameObjectWithBody
-  ) {
+  playerHitObstacle(player: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
     if (!this.hasObstacleCollidedWithPlayer) {
-      this.hasObstacleCollidedWithPlayer = true;
-      console.log("Obstacle hit detected");
-
-      // Stop obstacle and player moving after collision
-      obstacle.body.velocity.x = 0;
-      player.body.velocity.x = 0;
+      this.gameOver(player);
     }
   }
 
+  gameOver(player: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+    this.hasObstacleCollidedWithPlayer = true;
+    console.log("Obstacle hit detected");
+
+    this.gameOverText.visible = true;
+    this.buttonReset.visible = true;
+
+    // Stop obstacle and player moving after collision
+    this.obstacles.forEach((obstacle) => (obstacle.sprite.body.velocity.x = 0));
+    player.body.velocity.x = 0;
+  }
+
   increaseScore() {
-    let currentScore = this.data.get("score") as number;
+    let currentScore = this.scoreText.data.get("score") as number;
     this.setScore(currentScore + 1);
   }
 
   setScore(nextScore: number) {
-    this.data.set("score", nextScore);
+    this.scoreText.data.set("score", nextScore);
   }
 
   addBlockObstacle() {
@@ -146,7 +169,10 @@ export default class Demo extends Phaser.Scene {
   }
 
   handleObstacleMoveToOffScreen(obstacle: Obstacle) {
-    if (obstacle.sprite.body.position.x >= -obstacle.sprite.width) {
+    if (
+      obstacle.sprite.body &&
+      obstacle.sprite.body.position.x >= -obstacle.sprite.width
+    ) {
       return;
     }
 
@@ -161,7 +187,12 @@ export default class Demo extends Phaser.Scene {
 
     deletedObstacles[0].sprite.destroy();
     console.log("Obstacle destroyed forever:", deletedObstacles[0]);
-    this.addBlockObstacle();
+  }
+
+  getIntervalBetweenSpawn() {
+    const MAX = 2000;
+    const MIN = 1000;
+    return Math.random() * (MAX - MIN) + MIN;
   }
 
   setupObstacleCollisions(obstacle: Obstacle) {
@@ -172,8 +203,7 @@ export default class Demo extends Phaser.Scene {
     this.physics.add.collider(
       obstacle.sprite,
       this.player.sprite,
-      (obstacleSprite, playerSprite) =>
-        this.playerHitObstacle(obstacleSprite, playerSprite)
+      (obstacleSprite, playerSprite) => this.playerHitObstacle(playerSprite)
     );
 
     this.physics.add.overlap(
@@ -191,6 +221,7 @@ export default class Demo extends Phaser.Scene {
   setupPlayer() {
     let createdPlayer = new Player(this);
     this.physics.add.existing(createdPlayer.sprite);
+    this.hasObstacleCollidedWithPlayer = false;
     createdPlayer.sprite.body.collideWorldBounds = true;
     createdPlayer.sprite.body.gravity.y = 2525;
 
