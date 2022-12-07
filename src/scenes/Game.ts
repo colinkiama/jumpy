@@ -15,6 +15,8 @@ export default class Demo extends Phaser.Scene {
   private obstacles: Obstacle[] = [];
   private checkpointLine!: Phaser.GameObjects.Line;
   private scoreText!: Phaser.GameObjects.Text;
+  private buttonReset!: Phaser.GameObjects.Rectangle;
+  private gameOverText!: Phaser.GameObjects.Text;
 
   constructor() {
     super("GameScene");
@@ -37,6 +39,15 @@ export default class Demo extends Phaser.Scene {
       color: "#00ff00",
     });
 
+    this.gameOverText = this.add.text(400 - 40 , 300 - 10, 'GameOver', {
+      color: '#000000'}).setDepth(2);
+    this.gameOverText.visible = false;
+    this.buttonReset = this.add.rectangle(400 - 100, 300 - 40, 200, 80, 
+      0xffffff).setDepth(1).setOrigin(0, 0);
+    this.buttonReset.visible = false;
+    this.buttonReset.setInteractive({ useHandCursor: true });
+    this.buttonReset.on('pointerup', () => this.scene.start("GameScene"));
+
     this.scoreText.setText(["Score: " + this.data.get("score")]);
     this.data.events.on(
       "changedata-score",
@@ -44,6 +55,17 @@ export default class Demo extends Phaser.Scene {
         this.scoreText.setText(["Score: " + this.data.get("score")]);
       }
     );
+
+    this.startSpawner();
+  }
+
+  startSpawner() {
+    setTimeout( () => {
+      if(!this.hasObstacleCollidedWithPlayer) {
+        this.addBlockObstacle();
+        this.startSpawner()
+      } 
+    }, this.getIntervalBetweenSpawn() )
   }
 
   setupCheckpointLine() {
@@ -78,29 +100,29 @@ export default class Demo extends Phaser.Scene {
 
   update() {
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
-      this.handleObstacleMoveToOffScreen(this.obstacles[i]);
-
-      if (
-        this.obstacles[i].sprite.x > 200 ||
-        this.hasObstacleCollidedWithPlayer
-      ) {
-        continue;
+        this.handleObstacleMoveToOffScreen(this.obstacles[i]);
+      
+        if(this.obstacles[i]) {
+          if (this.obstacles[i].sprite.x > 200 ||
+            this.hasObstacleCollidedWithPlayer) {
+            continue;
+          }
+    
+          console.log(
+            "Player:",
+            this.player.sprite.body.position.x,
+            ",",
+            this.player.sprite.body.position.y
+          );
+    
+          console.log(
+            "Obstacle:",
+            this.obstacles[i].sprite.body.position.x,
+            ",",
+            this.obstacles[i].sprite.body.position.y
+          );
+        }
       }
-
-      console.log(
-        "Player:",
-        this.player.sprite.body.position.x,
-        ",",
-        this.player.sprite.body.position.y
-      );
-
-      console.log(
-        "Obstacle:",
-        this.obstacles[i].sprite.body.position.x,
-        ",",
-        this.obstacles[i].sprite.body.position.y
-      );
-    }
 
     if (this.keySpace.isDown && this.player.isGrounded) {
       this.player.jump();
@@ -108,17 +130,23 @@ export default class Demo extends Phaser.Scene {
   }
 
   playerHitObstacle(
-    obstacle: Phaser.Types.Physics.Arcade.GameObjectWithBody,
     player: Phaser.Types.Physics.Arcade.GameObjectWithBody
   ) {
     if (!this.hasObstacleCollidedWithPlayer) {
-      this.hasObstacleCollidedWithPlayer = true;
-      console.log("Obstacle hit detected");
-
-      // Stop obstacle and player moving after collision
-      obstacle.body.velocity.x = 0;
-      player.body.velocity.x = 0;
+      this.gameOver(player);
     }
+  }
+
+  gameOver(player: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+    this.hasObstacleCollidedWithPlayer = true;
+    console.log("Obstacle hit detected");
+
+    this.gameOverText.visible = true;
+    this.buttonReset.visible = true;
+
+    // Stop obstacle and player moving after collision
+    this.obstacles.forEach( obstacle => obstacle.sprite.body.velocity.x = 0)
+    player.body.velocity.x = 0;
   }
 
   increaseScore() {
@@ -146,7 +174,7 @@ export default class Demo extends Phaser.Scene {
   }
 
   handleObstacleMoveToOffScreen(obstacle: Obstacle) {
-    if (obstacle.sprite.body.position.x >= -obstacle.sprite.width) {
+    if ( obstacle.sprite.body && obstacle.sprite.body.position.x >= -obstacle.sprite.width) {
       return;
     }
 
@@ -161,7 +189,12 @@ export default class Demo extends Phaser.Scene {
 
     deletedObstacles[0].sprite.destroy();
     console.log("Obstacle destroyed forever:", deletedObstacles[0]);
-    this.addBlockObstacle();
+  }
+
+  getIntervalBetweenSpawn() {
+    const MAX = 2000
+    const MIN = 1000;
+    return Math.random() * (MAX - MIN) + MIN;
   }
 
   setupObstacleCollisions(obstacle: Obstacle) {
@@ -173,7 +206,7 @@ export default class Demo extends Phaser.Scene {
       obstacle.sprite,
       this.player.sprite,
       (obstacleSprite, playerSprite) =>
-        this.playerHitObstacle(obstacleSprite, playerSprite)
+        this.playerHitObstacle(playerSprite)
     );
 
     this.physics.add.overlap(
